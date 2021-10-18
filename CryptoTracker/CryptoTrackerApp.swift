@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct CryptoTrackerApp: App {
+    @StateObject var viewModel: HomeViewModel
+
+    init() {
+        let viewModel = HomeViewModel()
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
+                .environmentObject(viewModel)
         }
     }
 }

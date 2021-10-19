@@ -21,10 +21,21 @@ struct HomeView: View {
             VStack {
                 homeHeader
 
-                Spacer()
+                HomeStatisticView(showPortfolio: $showPortfolio)
 
-                allCoinsList
+                SearchBarView(searchText: $viewModel.searchText)
 
+                columnTitles
+
+                if !showPortfolio {
+                    allCoinsList
+                        .transition(.move(edge: .leading))
+                } else {
+                    ZStack(alignment: .top) {
+                        portfolioCoinList
+                    }
+                }
+                Spacer(minLength: 0)
             }
         }
     }
@@ -73,9 +84,62 @@ extension HomeView {
             ForEach(viewModel.allCoins) { coin in
                 CoinRowView(coin: coin, showingHoldingColumn: false)
                     .listRowInsets(.init(top: 10, leading: 0, bottom: 10, trailing: 10))
+                    .onTapGesture {
+                        // more to come 
+                    }
                     .listRowBackground(Color.theme.background)
             }
         }
         .listStyle(PlainListStyle())
+    }
+
+    private var portfolioCoinList: some View {
+        Text("Portfolio Coinlist")
+    }
+
+    private var columnTitles: some View {
+        HStack {
+            HStack {
+                Text("Coin")
+
+                Image(systemName: "chevron.down")
+            }
+            .onTapGesture {
+                // more to come
+            }
+
+            Spacer()
+
+            if showPortfolio {
+                HStack {
+                    Text("Holding")
+
+                    Image(systemName: "chevron.down")
+                }
+                .onTapGesture {
+                    // more to come
+                }
+            }
+
+            HStack {
+                Text("Price")
+
+                Image(systemName: "chevron.down")
+            }
+            .frame(width: UIScreen.main.bounds.width / 3.5, alignment: .trailing)
+            .onTapGesture {
+                // more to come
+            }
+
+            Button {
+                // more to come
+            } label: {
+                Image(systemName: "goforward")
+            }
+
+        }
+        .font(.caption)
+        .foregroundColor(Color.theme.secondaryText)
+        .padding(.horizontal)
     }
 }

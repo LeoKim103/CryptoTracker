@@ -3,7 +3,7 @@
 //  CryptoTracker
 //
 //  Created by Leo Kim on 18/10/2021.
-//
+// swiftlint:disable type_body_length
 
 import Foundation
 import SwiftUI
@@ -16,8 +16,10 @@ extension PreviewProvider {
 
 class DeveloperPreview {
     static let instance = DeveloperPreview()
-
     private init() { }
+    let exampleStat1 = StatisticModel(title: "Market Cap", value: "$12.5Bn", percentageChange: 25.34)
+    let exampleStat2 = StatisticModel(title: "Total Volume", value: "$1.23Tr")
+    let exampleStat3 = StatisticModel(title: "Portfolio", value: "$59.5k", percentageChange: -12.34)
 
     let coin = CoinModel(
         id: "bitcoin",
@@ -214,7 +216,6 @@ class DeveloperPreview {
             56969.140564644826,
             57154.57504790339,
             57336.828870254896
-
         ]),
         priceChangePercentage24HInCurrency: 3952.64,
         currentHoldings: 1.5

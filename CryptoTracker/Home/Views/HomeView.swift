@@ -12,32 +12,41 @@ struct HomeView: View {
     @State private var showPortfolio: Bool = false
 
     var body: some View {
-        ZStack {
-            // Background layer
-            Color.theme.background
-                .ignoresSafeArea()
+        NavigationView {
+            ZStack {
+                // Background layer
+                Color.theme.background
+                    .ignoresSafeArea()
 
-            // Content layer
-            VStack {
-                homeHeader
+                // Content layer
+                VStack {
+                    homeHeader
 
-                HomeStatisticView(showPortfolio: $showPortfolio)
+                    HomeStatisticView(showPortfolio: $showPortfolio)
 
-                SearchBarView(searchText: $viewModel.searchText)
+                    SearchBarView(searchText: $viewModel.searchText)
 
-                columnTitles
+                    columnTitles
 
-                if !showPortfolio {
-                    allCoinsList
-                        .transition(.move(edge: .leading))
-                } else {
-                    ZStack(alignment: .top) {
-                        portfolioCoinList
+                    if !showPortfolio {
+                        allCoinsList
+                            .transition(.move(edge: .leading))
+                    } else {
+                        ZStack(alignment: .top) {
+                            portfolioCoinList
+                        }
                     }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
+                .background(
+                    NavigationLink(destination: CoinDetailView(), label: {
+                        EmptyView()
+                    })
+                )
             }
+            .navigationBarHidden(true)
         }
+
     }
 }
 
@@ -103,9 +112,17 @@ extension HomeView {
                 Text("Coin")
 
                 Image(systemName: "chevron.down")
+                    .opacity(
+                        (viewModel.sortOptions == .rank || viewModel.sortOptions == .rankReversed) ?
+                        1.0 : 0.0
+                    )
+                    .rotationEffect(Angle(degrees: viewModel.sortOptions == .rank ? 0: 180))
             }
             .onTapGesture {
-                // more to come
+                withAnimation(.default) {
+                    viewModel.sortOptions = viewModel.sortOptions == .rank ?
+                        .rankReversed : .rank
+                }
             }
 
             Spacer()
@@ -115,9 +132,10 @@ extension HomeView {
                     Text("Holding")
 
                     Image(systemName: "chevron.down")
+
                 }
                 .onTapGesture {
-                    // more to come
+                    // more to come 
                 }
             }
 
@@ -125,17 +143,28 @@ extension HomeView {
                 Text("Price")
 
                 Image(systemName: "chevron.down")
+                    .opacity(
+                        (viewModel.sortOptions == .price || viewModel.sortOptions == .priceReversed) ?
+                        1.0 : 0.0
+                    )
+                    .rotationEffect(Angle(degrees: viewModel.sortOptions == .price ? 0: 180))
             }
             .frame(width: UIScreen.main.bounds.width / 3.5, alignment: .trailing)
             .onTapGesture {
-                // more to come
+                withAnimation(.default) {
+                    viewModel.sortOptions = viewModel.sortOptions == .price ?
+                        .priceReversed : .price
+                }
             }
 
             Button {
-                // more to come
+                withAnimation(.linear(duration: 2.0)) {
+                    viewModel.reloadData()
+                }
             } label: {
                 Image(systemName: "goforward")
             }
+            .rotationEffect(Angle(degrees: viewModel.isLoading ? 360 : 0), anchor: .center)
 
         }
         .font(.caption)

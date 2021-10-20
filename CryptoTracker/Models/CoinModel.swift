@@ -54,6 +54,10 @@ struct CoinModel: Identifiable, Codable {
         case priceChangePercentage24HInCurrency = "price_change_percentage_24h_in_currency"
         case currentHoldings
     }
+
+    var rank: Int {
+        return Int(marketCapRank ?? 0)
+    }
 }
 
 struct SparklineIn7D: Codable {

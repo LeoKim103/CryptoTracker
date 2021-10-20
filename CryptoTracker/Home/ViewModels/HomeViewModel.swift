@@ -12,10 +12,16 @@ class HomeViewModel: ObservableObject {
     @Published var allCoins = [CoinModel]()
     @Published var statistics = [StatisticModel]()
     @Published var searchText = ""
+    @Published var sortOptions: SortOptions = .rank
+    @Published var isLoading: Bool = false
 
     private let coinDataService = CoinDataService()
     private let marketDataService = MarketDataService()
     private var cancellables = Set<AnyCancellable>()
+
+    enum SortOptions {
+        case rank, rankReversed, holdings, holdingsReversed, price, priceReversed
+    }
 
     init() {
         addSubscriber()
@@ -24,8 +30,8 @@ class HomeViewModel: ObservableObject {
     func addSubscriber() {
 
         $searchText
-            .combineLatest(coinDataService.$allCoins)
-            .map(filteredCoins)
+            .combineLatest(coinDataService.$allCoins, $sortOptions)
+            .map(filteredAndSortCoins)
             .sink { [weak self] (returnedCoins) in
                 self?.allCoins = returnedCoins
             }
@@ -76,6 +82,12 @@ class HomeViewModel: ObservableObject {
 //        var updatedCoins = filter
 //    }
 
+    private func filteredAndSortCoins(text: String, coins: [CoinModel], sort: SortOptions) -> [CoinModel] {
+        var updatedCoins = filteredCoins(text: text, coins: coins)
+        sortCoins(sort: sort, coin: &updatedCoins)
+        return updatedCoins
+    }
+
     private func filteredCoins(text: String, coins: [CoinModel]) -> [CoinModel] {
         guard !text.isEmpty else {
             return coins
@@ -90,5 +102,24 @@ class HomeViewModel: ObservableObject {
                 coin.id.lowercased()
                     .contains(lowercasedText)
         }
+    }
+
+    private func sortCoins(sort: SortOptions, coin: inout [CoinModel]) {
+        switch sort {
+        case .rank, .holdings:
+            coin.sort(by: { $0.rank < $1.rank})
+        case .rankReversed, .holdingsReversed:
+            coin.sort(by: { $0.rank > $1.rank})
+        case .price:
+            coin.sort(by: { $0.currentPrice > $1.currentPrice})
+        case .priceReversed:
+            coin.sort(by: { $0.currentPrice < $1.currentPrice})
+        }
+    }
+
+    func reloadData() {
+        isLoading = true
+        coinDataService.getCoin()
+        marketDataService.getData()
     }
 }

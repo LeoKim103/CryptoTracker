@@ -18,7 +18,7 @@ class NetworkingManager {
             case .badURLResponse(url: let url):
                 return "Bad response from \(url)"
             case .unknown:
-                return "Unknown error occured"
+                return "Unknown error occurred"
             }
         }
     }

@@ -26,6 +26,6 @@ struct HomeStatisticView: View {
 struct HomeStatisticView_Previews: PreviewProvider {
     static var previews: some View {
         HomeStatisticView(showPortfolio: .constant(false))
-            .environmentObject(HomeViewModel())
+            .environmentObject(HomeViewModel(dataController: DataController()))
     }
 }

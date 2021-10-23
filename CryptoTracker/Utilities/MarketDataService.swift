@@ -13,7 +13,7 @@ class MarketDataService {
 
     @Published var marketData: MarketDataModel?
 
-    private var marketDataSubcription: AnyCancellable?
+    private var marketDataSubscription: AnyCancellable?
 
     init() {
         getData()
@@ -24,13 +24,13 @@ class MarketDataService {
             string: "https://api.coingecko.com/api/v3/global")
         else { return }
 
-        marketDataSubcription = NetworkingManager.download(url: url)
+        marketDataSubscription = NetworkingManager.download(url: url)
             .decode(type: GlobalData.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: NetworkingManager.handleCompletion,
                   receiveValue: { [weak self] (returnedGlobalData) in
                 self?.marketData = returnedGlobalData.data
-                self?.marketDataSubcription?.cancel()
+                self?.marketDataSubscription?.cancel()
             })
     }
 }

@@ -15,6 +15,11 @@ struct CoinRowView: View {
         HStack(spacing: 0) {
             leftColumn
             Spacer()
+            if showingHoldingColumn {
+                centerColumn
+            }
+
+            Spacer()
             rightColumn
         }
         .font(.subheadline)
@@ -54,6 +59,16 @@ extension CoinRowView {
         }
     }
 
+    private var centerColumn: some View {
+        VStack {
+            Text(coin.currentHoldingValue.asCurrencyWith2Decimals())
+                .bold()
+
+            Text((coin.currentHoldings ?? 0).asNumberString())
+        }
+        .foregroundColor(Color.theme.accent)
+        .frame(alignment: .center)
+    }
     private var rightColumn: some View {
         VStack(alignment: .trailing) {
             Text(coin.currentPrice.asCurrencyWith6Decimals())
@@ -67,7 +82,7 @@ extension CoinRowView {
                 )
         }
         .frame(
-            width: UIScreen.main.bounds.width / 3.5,
+            width: UIScreen.main.bounds.width / 4,
             alignment: .trailing)
 
     }

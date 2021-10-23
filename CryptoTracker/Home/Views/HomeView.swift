@@ -10,50 +10,59 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var viewModel: HomeViewModel
     @State private var showPortfolio: Bool = false
+    @State private var showPortfolioView: Bool = false
+    @State private var showDetailView: Bool = false
+    @State private var selectedCoin: CoinModel?
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background layer
-                Color.theme.background
-                    .ignoresSafeArea()
-
-                // Content layer
-                VStack {
-                    homeHeader
-
-                    HomeStatisticView(showPortfolio: $showPortfolio)
-
-                    SearchBarView(searchText: $viewModel.searchText)
-
-                    columnTitles
-
-                    if !showPortfolio {
-                        allCoinsList
-                            .transition(.move(edge: .leading))
-                    } else {
-                        ZStack(alignment: .top) {
-                            portfolioCoinList
-                        }
-                    }
-                    Spacer(minLength: 0)
+        ZStack {
+            // Background layer
+            Color.theme.background
+                .ignoresSafeArea()
+                .sheet(isPresented: $showPortfolioView) {
+                    PortfolioView()
+                        .environmentObject(viewModel)
                 }
-                .background(
-                    NavigationLink(destination: CoinDetailView(), label: {
+
+            // Content layer
+            VStack {
+                homeHeader
+
+                HomeStatisticView(showPortfolio: $showPortfolio)
+
+                SearchBarView(searchText: $viewModel.searchText)
+
+                columnTitles
+
+                if !showPortfolio {
+                    allCoinsList
+                        .transition(.move(edge: .leading))
+                } else {
+                    ZStack(alignment: .top) {
+                        portfolioCoinList
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .background(
+                NavigationLink(
+                    destination: DetailLoadingView(coin: $selectedCoin),
+                    isActive: $showDetailView,
+                    label: {
                         EmptyView()
                     })
-                )
-            }
-            .navigationBarHidden(true)
+            )
         }
-
     }
 }
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
-            .environmentObject(HomeViewModel())
+        NavigationView {
+            HomeView()
+                .navigationBarHidden(true)
+        }
+        .environmentObject(HomeViewModel(dataController: DataController()))
     }
 }
 
@@ -63,7 +72,11 @@ extension HomeView {
             CircleButtonView(iconName: showPortfolio ? "plus" : "info")
                 .animation(.none)
                 .onTapGesture {
-                    // more to come
+                    if showPortfolio {
+                        showPortfolioView.toggle()
+                    } else {
+                        // show setting view
+                    }
                 }
                 .background(CircleButtonAnimation(animate: $showPortfolio))
 
@@ -94,7 +107,7 @@ extension HomeView {
                 CoinRowView(coin: coin, showingHoldingColumn: false)
                     .listRowInsets(.init(top: 10, leading: 0, bottom: 10, trailing: 10))
                     .onTapGesture {
-                        // more to come 
+                        segue(coin: coin)
                     }
                     .listRowBackground(Color.theme.background)
             }
@@ -102,8 +115,31 @@ extension HomeView {
         .listStyle(PlainListStyle())
     }
 
+    private var portfolioEmptyText: some View {
+        Text("You haven't added any coin to your portfolio yet. Click the + button to add coin.")
+            .font(.callout)
+            .fontWeight(.medium)
+            .foregroundColor(Color.theme.accent)
+            .multilineTextAlignment(.center)
+            .padding(50)
+    }
+
     private var portfolioCoinList: some View {
-        Text("Portfolio Coinlist")
+        List {
+            ForEach(viewModel.portfolioCoins) { coin in
+                CoinRowView(coin: coin, showingHoldingColumn: true)
+                    .listRowInsets(.init(top: 10, leading: 0, bottom: 10, trailing: 10))
+                    .onTapGesture {
+                        segue(coin: coin)
+                    }
+            }
+        }
+        .listStyle(PlainListStyle())
+    }
+
+    private func segue(coin: CoinModel) {
+        selectedCoin = coin
+        showDetailView.toggle()
     }
 
     private var columnTitles: some View {
@@ -132,10 +168,14 @@ extension HomeView {
                     Text("Holding")
 
                     Image(systemName: "chevron.down")
+                        .opacity((viewModel.sortOptions == .holdings || viewModel.sortOptions == .holdingsReversed) ? 1.0 : 0.0)
+                        .rotationEffect(Angle(degrees: viewModel.sortOptions == .holdings ? 0 : 180))
 
                 }
                 .onTapGesture {
-                    // more to come 
+                    withAnimation(.default) {
+                        viewModel.sortOptions = viewModel.sortOptions == .holdings ? .holdingsReversed : .holdings
+                    }
                 }
             }
 

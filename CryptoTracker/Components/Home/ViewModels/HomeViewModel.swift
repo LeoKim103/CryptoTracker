@@ -7,11 +7,11 @@
 
 import Foundation
 import Combine
-import SwiftUI
 
 class HomeViewModel: ObservableObject {
     @Published var allCoins = [CoinModel]()
     @Published var portfolioCoins = [CoinModel]()
+    @Published var selectedCoin: CoinModel?
     @Published var statistics = [StatisticModel]()
     @Published var searchText = ""
     @Published var sortOptions: SortOptions = .rank
@@ -19,7 +19,7 @@ class HomeViewModel: ObservableObject {
 
     private let coinDataService = CoinDataService()
     private let marketDataService = MarketDataService()
-    private let portfolioViewModel: PortfolioViewModel
+    private let portfolioCoreDataService: PortfolioCoreDataService
     private var cancellables = Set<AnyCancellable>()
 
     enum SortOptions {
@@ -27,12 +27,12 @@ class HomeViewModel: ObservableObject {
     }
 
     init(dataController: DataController) {
-        portfolioViewModel = PortfolioViewModel(dataController: dataController)
+        portfolioCoreDataService = PortfolioCoreDataService(dataController: dataController)
+
         addSubscriber()
     }
 
     func addSubscriber() {
-
         $searchText
             .combineLatest(coinDataService.$allCoins, $sortOptions)
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
@@ -43,7 +43,7 @@ class HomeViewModel: ObservableObject {
             .store(in: &cancellables)
 
         $allCoins
-            .combineLatest(portfolioViewModel.$savedPortfolios)
+            .combineLatest(portfolioCoreDataService.$savedPortfolios)
             .map(mapAllCoinsToPortfolioCoins)
             .sink { [weak self] (returnedCoins) in
                 guard let self = self else { return }
@@ -167,7 +167,12 @@ class HomeViewModel: ObservableObject {
     }
 
     func updatePortfolio(coin: CoinModel, amount: Double) {
-        portfolioViewModel.updatePortfolio(coin: coin, amount: amount)
+        portfolioCoreDataService.updatePortfolio(coin: coin, amount: amount)
+    }
+
+    func removeSelectedCoin() {
+        selectedCoin = nil
+        searchText = ""
     }
 
     func reloadData() {

@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var showPortfolio: Bool = false
     @State private var showPortfolioView: Bool = false
     @State private var showDetailView: Bool = false
+    @State private var showSettingView: Bool = false
     @State private var selectedCoin: CoinModel?
 
     var body: some View {
@@ -44,15 +45,19 @@ struct HomeView: View {
                 }
                 Spacer(minLength: 0)
             }
-            .background(
-                NavigationLink(
-                    destination: DetailLoadingView(coin: $selectedCoin),
-                    isActive: $showDetailView,
-                    label: {
-                        EmptyView()
-                    })
-            )
+            .sheet(isPresented: $showSettingView) {
+                SettingView()
+            }
+
         }
+        .background(
+            NavigationLink(
+                destination: DetailLoadingView(coin: $selectedCoin),
+                isActive: $showDetailView,
+                label: {
+                    EmptyView()
+                })
+        )
     }
 }
 
@@ -75,7 +80,7 @@ extension HomeView {
                     if showPortfolio {
                         showPortfolioView.toggle()
                     } else {
-                        // show setting view
+                        showSettingView.toggle()
                     }
                 }
                 .background(CircleButtonAnimation(animate: $showPortfolio))
@@ -168,7 +173,11 @@ extension HomeView {
                     Text("Holding")
 
                     Image(systemName: "chevron.down")
-                        .opacity((viewModel.sortOptions == .holdings || viewModel.sortOptions == .holdingsReversed) ? 1.0 : 0.0)
+                        .opacity(
+                            (viewModel.sortOptions == .holdings ||
+                             viewModel.sortOptions == .holdingsReversed) ?
+                                1.0 : 0.0
+                        )
                         .rotationEffect(Angle(degrees: viewModel.sortOptions == .holdings ? 0 : 180))
 
                 }

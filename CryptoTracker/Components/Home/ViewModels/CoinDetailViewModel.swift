@@ -22,7 +22,7 @@ class CoinDetailViewModel: ObservableObject {
     init(coin: CoinModel) {
         self.coin = coin
         self.coinDetailDataService = CoinDetailDataService(coin: coin)
-        addSubscriber()
+        self.addSubscriber()
     }
 
     private func addSubscriber() {

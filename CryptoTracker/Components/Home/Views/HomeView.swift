@@ -18,7 +18,8 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             // Background layer
-            Color.theme.background
+
+            GlassMorphismView()
                 .ignoresSafeArea()
                 .sheet(isPresented: $showPortfolioView) {
                     PortfolioView()
@@ -47,6 +48,7 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showSettingView) {
                 SettingView()
+                    .environmentObject(DataController())
             }
 
         }
@@ -111,10 +113,10 @@ extension HomeView {
             ForEach(viewModel.allCoins) { coin in
                 CoinRowView(coin: coin, showingHoldingColumn: false)
                     .listRowInsets(.init(top: 10, leading: 0, bottom: 10, trailing: 10))
+                    .listRowBackground(Color.theme.background.opacity(0.01))
                     .onTapGesture {
                         segue(coin: coin)
                     }
-                    .listRowBackground(Color.theme.background)
             }
         }
         .listStyle(PlainListStyle())
@@ -134,6 +136,7 @@ extension HomeView {
             ForEach(viewModel.portfolioCoins) { coin in
                 CoinRowView(coin: coin, showingHoldingColumn: true)
                     .listRowInsets(.init(top: 10, leading: 0, bottom: 10, trailing: 10))
+                    .listRowBackground(Color.theme.background.opacity(0.01))
                     .onTapGesture {
                         segue(coin: coin)
                     }

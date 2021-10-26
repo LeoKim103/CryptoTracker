@@ -12,9 +12,9 @@ import Combine
 class CoinImageService {
     @Published var image: UIImage?
 
-    private var imageSubcription: AnyCancellable?
+    private var imageSubscription: AnyCancellable?
     private let coin: CoinModel
-    private let filManager = LocalFileManager.instance
+    private let fileManager = LocalFileManager.instance
     private let folderName = "coin_images"
     private let imageName: String
 
@@ -27,7 +27,7 @@ class CoinImageService {
 
     private func getCoinImage() {
         // fetch image from previously saved image
-        if let savedImage = filManager.getImage(imageName: imageName, folderName: folderName) {
+        if let savedImage = fileManager.getImage(imageName: imageName, folderName: folderName) {
             image = savedImage
         } else {
             // if the image is not downloaded, download it now
@@ -38,7 +38,7 @@ class CoinImageService {
     private func downloadCoinImage() {
         guard let url = URL(string: coin.image) else { return }
 
-        imageSubcription = NetworkingManager.download(url: url)
+        imageSubscription = NetworkingManager.download(url: url)
             .tryMap({ (data) -> UIImage? in
                 return UIImage(data: data)
             })
@@ -49,8 +49,8 @@ class CoinImageService {
                     guard let self = self, let downloadedImage = returnedImage else { return }
 
                     self.image = downloadedImage
-                    self.imageSubcription?.cancel()
-                    self.filManager.saveImage(
+                    self.imageSubscription?.cancel()
+                    self.fileManager.saveImage(
                         image: downloadedImage,
                         imageName: self.imageName,
                         folderName: self.folderName)

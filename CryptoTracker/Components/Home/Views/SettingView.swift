@@ -8,20 +8,29 @@
 import SwiftUI
 
 struct SettingView: View {
+    @EnvironmentObject var dataController: DataController
+    @Environment(\.presentationMode) var presentationMode
+
+    @State private var showingDeletionConfirm = false
+
     let githubURL = URL(string: "https://github.com/LeoKim103")!
     let coinGeckoURL = URL(string: "https://www.coingecko.com")!
 
     var body: some View {
         NavigationView {
             ZStack {
-                Color.theme.background.ignoresSafeArea()
+                GlassMorphismView()
 
                 List {
                     coinGeckoSection
-                        .listRowBackground(Color.theme.background.opacity(0.5))
+                        .listRowBackground(GlassMorphismView())
 
                     developerSection
-                        .listRowBackground(Color.theme.background.opacity(0.5))
+                        .listRowBackground(GlassMorphismView())
+
+                    deleteAllDataSection
+                        .listRowBackground(GlassMorphismView())
+
                 }
                 .font(.headline)
                 .accentColor(.blue)
@@ -32,6 +41,13 @@ struct SettingView: View {
                         XMarkButton()
                     }
                 }
+                .alert(isPresented: $showingDeletionConfirm) {
+                    Alert(
+                        title: Text("Delete all saved data?".uppercased()),
+                        message: Text("Are you sure you want to delete all saved coins?"),
+                        primaryButton: .default(Text("Delete"), action: delete),
+                        secondaryButton: .cancel())
+                }
             }
         }
     }
@@ -40,6 +56,8 @@ struct SettingView: View {
 struct SettingView_Previews: PreviewProvider {
     static var previews: some View {
         SettingView()
+            .environmentObject(DataController())
+            .preferredColorScheme(.dark)
     }
 }
 
@@ -73,5 +91,23 @@ extension SettingView {
             Text("Application")
         }
 
+    }
+
+    private var deleteAllDataSection: some View {
+        Section {
+            Button {
+                showingDeletionConfirm.toggle()
+            } label: {
+                Text("Delete all saved data".uppercased())
+                    .foregroundColor(Color.red)
+            }
+        } header: {
+            Text("User data")
+        }
+    }
+
+    private func delete() {
+        dataController.deleteAll()
+        presentationMode.wrappedValue.dismiss()
     }
 }

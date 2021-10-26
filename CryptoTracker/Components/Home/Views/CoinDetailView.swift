@@ -57,7 +57,7 @@ struct CoinDetailView: View {
                 .padding()
             }
         }
-        .background(Color.theme.background.ignoresSafeArea())
+        .background(GlassMorphismView().ignoresSafeArea())
         .navigationTitle(viewModel.coin.name)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
